@@ -21,9 +21,9 @@
  */
 
 module.exports = {
-    host: 'junction.proxy.rlwy.net',
+    host: 'localhost',
     user: 'root',
-    password: 'TJrQDAPLcSaqzsfHMGaiVfePGDTPeFde',
+    password: '1234',
     database: 'horizonhealth'
   };
   
