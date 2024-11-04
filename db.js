@@ -24,21 +24,16 @@ const mysql = require ( 'mysql' );
 const dotenv = require ( 'dotenv' );
 dotenv.config ();
 
+// Configuración de la base de datos
 const dbConfig = {
   host: process.env.HOST,
   user: process.env.USER,
   password: process.env.PASSWORD,
   database: process.env.DB
 };
-
-const connection = mysql.createConnection ( dbConfig );
-
-connection.connect ( ( err ) => {
-  if ( err ) {
-    console.error ( 'Error conectando a la base de datos:', err );
-    return;
-  }
-  console.log ( 'Conectado a la base de datos MySQL' );
-} );
-
-module.exports = connection;
+ 
+ // Crear la conexión usando el modo de promesas
+ const connection = mysql.createPool(dbConfig);
+ 
+ module.exports = connection;
+ 

@@ -13,77 +13,36 @@
 
  const express = require('express');
  const router = express.Router();
- const db = require('./db');  // Configuración y conexión a la base de datos
+ const db = require('./db');  // Conexión a la base de datos
  
- // Obtener actividades estándar
+ // Obtener una actividad estándar aleatoria
  router.get('/actividades', async (req, res) => {
      try {
-         const [rows] = await db.query('SELECT * FROM actividad');
-         res.json(rows);
+         const [actividad] = await db.query('SELECT * FROM actividad ORDER BY RAND() LIMIT 1');
+         res.json(actividad[0] || { error: 'No se encontraron actividades' });
      } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al obtener actividades' });
+         console.error('Error al obtener actividad:', error);
+         res.status(500).json({ error: 'Error al obtener actividad' });
      }
  });
  
- // Obtener actividades premium (solo para usuarios premium)
+ // Obtener una actividad premium aleatoria (solo para usuarios premium)
  router.get('/actividades/premium', async (req, res) => {
      const { userId } = req.query;
  
      try {
-         // Verificar si el usuario es premium
-         const [user] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
+         const userResults = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
+         const user = userResults[0];
  
-         if (user.length > 0 && user[0].premium) {
-             // Si el usuario es premium, obtener actividades premium
-             const [rows] = await db.query('SELECT * FROM actividadPremium WHERE id_usuario = ?', [userId]);
-             res.json(rows);
+         if (user && user.length > 0 && user[0].premium) {
+             const [actividadPremium] = await db.query('SELECT * FROM actividadPremium WHERE id_usuario = ? ORDER BY RAND() LIMIT 1', [userId]);
+             res.json(actividadPremium[0] || { error: 'No se encontraron actividades premium' });
          } else {
              res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
          }
      } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al obtener actividades premium' });
-     }
- });
- 
- // Agregar nueva actividad estándar
- router.post('/actividades', async (req, res) => {
-     const { nombre_actividad, descripcion, tiempo_actividad } = req.body;
- 
-     try {
-         const result = await db.query(
-             'INSERT INTO actividad (nombre_actividad, descripcion, tiempo_actividad) VALUES (?, ?, ?)',
-             [nombre_actividad, descripcion, tiempo_actividad]
-         );
-         res.status(201).json({ message: 'Actividad agregada exitosamente', actividadId: result.insertId });
-     } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al agregar actividad' });
-     }
- });
- 
- // Agregar nueva actividad premium (solo para usuarios premium)
- router.post('/actividades/premium', async (req, res) => {
-     const { userId, nombre_actividadPre, descripcionPre, tiempo_actividadPre } = req.body;
- 
-     try {
-         // Verificar si el usuario es premium
-         const [user] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
- 
-         if (user.length > 0 && user[0].premium) {
-             // Si el usuario es premium, agregar actividad premium
-             const result = await db.query(
-                 'INSERT INTO actividadPremium (id_usuario, nombre_actividadPre, descripcionPre, tiempo_actividadPre) VALUES (?, ?, ?, ?)',
-                 [userId, nombre_actividadPre, descripcionPre, tiempo_actividadPre]
-             );
-             res.status(201).json({ message: 'Actividad premium agregada exitosamente', actividadPremiumId: result.insertId });
-         } else {
-             res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
-         }
-     } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al agregar actividad premium' });
+         console.error('Error al obtener actividad premium:', error);
+         res.status(500).json({ error: 'Error al obtener actividad premium' });
      }
  });
  

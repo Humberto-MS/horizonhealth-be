@@ -15,33 +15,34 @@
  const router = express.Router();
  const db = require('./db');  // Conexión a la base de datos
  
- // Obtener lecturas estándar
+ // Obtener una lectura estándar aleatoria
  router.get('/lecturas', async (req, res) => {
      try {
-         const [rows] = await db.query('SELECT * FROM lectura');
-         res.json(rows);
+         const [lectura] = await db.query('SELECT * FROM lectura ORDER BY RAND() LIMIT 1');
+         res.json(lectura[0] || { error: 'No se encontraron lecturas' });
      } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al obtener lecturas' });
+         console.error('Error al obtener lectura:', error);
+         res.status(500).json({ error: 'Error al obtener lectura' });
      }
  });
  
- // Obtener lecturas premium (solo para usuarios premium)
+ // Obtener una lectura premium aleatoria (solo para usuarios premium)
  router.get('/lecturas/premium', async (req, res) => {
      const { userId } = req.query;
  
      try {
-         const [user] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
+         const userResults = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
+         const user = userResults[0];
  
-         if (user.length > 0 && user[0].premium) {
-             const [rows] = await db.query('SELECT * FROM lecturaPremium WHERE id_usuario = ?', [userId]);
-             res.json(rows);
+         if (user && user.length > 0 && user[0].premium) {
+             const [lecturaPremium] = await db.query('SELECT * FROM lecturaPremium WHERE id_usuario = ? ORDER BY RAND() LIMIT 1', [userId]);
+             res.json(lecturaPremium[0] || { error: 'No se encontraron lecturas premium' });
          } else {
              res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
          }
      } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al obtener lecturas premium' });
+         console.error('Error al obtener lectura premium:', error);
+         res.status(500).json({ error: 'Error al obtener lectura premium' });
      }
  });
  
