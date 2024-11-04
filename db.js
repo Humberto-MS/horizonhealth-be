@@ -19,12 +19,16 @@
  *: base de datos hecha en MySQL
  *:------------------------------------------------------------------------------------------------------
  */
+
 const mysql = require ( 'mysql' );
+const dotenv = require ( 'dotenv' );
+dotenv.config ();
+
 const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: '1234',
-  database: 'horizonhealth'
+  host: process.env.HOST,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DB
 };
 
 const connection = mysql.createConnection ( dbConfig );

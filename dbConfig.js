@@ -20,10 +20,13 @@
  *:------------------------------------------------------------------------------------------------------
  */
 
+const dotenv = require ( 'dotenv' );
+dotenv.config ();
+
 module.exports = {
-    host: 'localhost',
-    user: 'root',
-    password: '1234',
-    database: 'horizonhealth'
-  };
+  host: process.env.HOST,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DB
+};
   
