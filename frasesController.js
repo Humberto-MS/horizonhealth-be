@@ -15,61 +15,55 @@
  const router = express.Router();
  const db = require('./db');  // Conexión a la base de datos
  
- // Obtener frases estándar según el puntaje más reciente del usuario
+ // Obtener una frase estándar aleatoria según el puntaje más reciente del usuario
  router.get('/frases', async (req, res) => {
      const { userId } = req.query;
  
      try {
-         // Obtener el puntaje más reciente del test del usuario
-         const [test] = await db.query(
+         const testResults = await db.query(
              'SELECT puntaje FROM test WHERE id_usuario = ? ORDER BY fecha_test DESC LIMIT 1',
              [userId]
          );
  
-         if (test.length > 0) {
+         const test = testResults[0];
+         if (test && test.length > 0) {
              const puntaje = test[0].puntaje;
- 
-             // Obtener frases que coincidan con el puntaje
-             const [frases] = await db.query(
-                 'SELECT frase, autor FROM frases WHERE puntajeFrase = ?',
+             const [frase] = await db.query(
+                 'SELECT frase, autor FROM frases WHERE puntajeFrase = ? ORDER BY RAND() LIMIT 1',
                  [puntaje]
              );
- 
-             res.json(frases);
+             res.json(frase[0] || { error: 'No se encontraron frases' });
          } else {
              res.status(404).json({ error: 'No se encontró un puntaje reciente para este usuario.' });
          }
      } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al obtener las frases.' });
+         console.error('Error al obtener frase estándar:', error);
+         res.status(500).json({ error: 'Error al obtener la frase.' });
      }
  });
  
- // Obtener frases premium según el puntaje más reciente del usuario (solo para usuarios premium)
+ // Obtener una frase premium aleatoria según el puntaje más reciente del usuario (solo para usuarios premium)
  router.get('/frases/premium', async (req, res) => {
      const { userId } = req.query;
  
      try {
-         // Verificar si el usuario es premium
-         const [user] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
+         const userResults = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
+         const user = userResults[0];
  
-         if (user.length > 0 && user[0].premium) {
-             // Obtener el puntaje más reciente del test del usuario
-             const [test] = await db.query(
+         if (user && user.length > 0 && user[0].premium) {
+             const testResults = await db.query(
                  'SELECT puntaje FROM test WHERE id_usuario = ? ORDER BY fecha_test DESC LIMIT 1',
                  [userId]
              );
  
-             if (test.length > 0) {
+             const test = testResults[0];
+             if (test && test.length > 0) {
                  const puntaje = test[0].puntaje;
- 
-                 // Obtener frases premium que coincidan con el puntaje
-                 const [frasesPremium] = await db.query(
-                     'SELECT frasePre AS frase, autorPre AS autor FROM frasesPremium WHERE puntajeFrasePre = ?',
+                 const [frasePremium] = await db.query(
+                     'SELECT frasePre AS frase, autorPre AS autor FROM frasesPremium WHERE puntajeFrasePre = ? ORDER BY RAND() LIMIT 1',
                      [puntaje]
                  );
- 
-                 res.json(frasesPremium);
+                 res.json(frasePremium[0] || { error: 'No se encontraron frases premium' });
              } else {
                  res.status(404).json({ error: 'No se encontró un puntaje reciente para este usuario.' });
              }
@@ -77,8 +71,8 @@
              res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
          }
      } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al obtener las frases premium.' });
+         console.error('Error al obtener frase premium:', error);
+         res.status(500).json({ error: 'Error al obtener la frase premium.' });
      }
  });
  

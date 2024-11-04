@@ -11,77 +11,38 @@
  *:======================================================================================================
  */
 
- const express = require('express');
- const router = express.Router();
- const db = require('./db');  // Conexión a la base de datos
- 
- // Obtener ejercicios estándar
- router.get('/ejercicios', async (req, res) => {
-     try {
-         const [rows] = await db.query('SELECT * FROM ejercicio');
-         res.json(rows);
-     } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al obtener ejercicios' });
-     }
- });
- 
- // Obtener ejercicios premium (solo para usuarios premium)
- router.get('/ejercicios/premium', async (req, res) => {
-     const { userId } = req.query;
- 
-     try {
-         const [user] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
- 
-         if (user.length > 0 && user[0].premium) {
-             const [rows] = await db.query('SELECT * FROM ejercicioPremium WHERE id_usuario = ?', [userId]);
-             res.json(rows);
-         } else {
-             res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
-         }
-     } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al obtener ejercicios premium' });
-     }
- });
- 
- // Agregar ejercicio estándar
- router.post('/ejercicios', async (req, res) => {
-     const { rutina, tiempo, completado_ejercicio } = req.body;
- 
-     try {
-         const result = await db.query(
-             'INSERT INTO ejercicio (rutina, tiempo, completado_ejercicio) VALUES (?, ?, ?)',
-             [rutina, tiempo, completado_ejercicio]
-         );
-         res.status(201).json({ message: 'Ejercicio agregado exitosamente', ejercicioId: result.insertId });
-     } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al agregar ejercicio' });
-     }
- });
- 
- // Agregar ejercicio premium (solo para usuarios premium)
- router.post('/ejercicios/premium', async (req, res) => {
-     const { userId, rutinaPre, tiempoPre, completado_ejercicioPre } = req.body;
- 
-     try {
-         const [user] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
- 
-         if (user.length > 0 && user[0].premium) {
-             const result = await db.query(
-                 'INSERT INTO ejercicioPremium (id_usuario, rutinaPre, tiempoPre, completado_ejercicioPre) VALUES (?, ?, ?, ?)',
-                 [userId, rutinaPre, tiempoPre, completado_ejercicioPre]
-             );
-             res.status(201).json({ message: 'Ejercicio premium agregado exitosamente', ejercicioPremiumId: result.insertId });
-         } else {
-             res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
-         }
-     } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al agregar ejercicio premium' });
-     }
- });
- 
- module.exports = router;
- 
+const express = require('express');
+const router = express.Router();
+const db = require('./db');  // Conexión a la base de datos
+
+// Obtener un ejercicio estándar aleatorio
+router.get('/ejercicios', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM ejercicio ORDER BY RAND() LIMIT 1');
+        res.json(rows[0] || { error: 'No se encontraron ejercicios' });
+    } catch (error) {
+        console.error('Error al obtener ejercicio estándar:', error);
+        res.status(500).json({ error: 'Error al obtener ejercicio' });
+    }
+});
+
+// Obtener un ejercicio premium aleatorio (solo para usuarios premium)
+router.get('/ejercicios/premium', async (req, res) => {
+    const { userId } = req.query;
+
+    try {
+        const [user] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
+
+        if (user.length > 0 && user[0].premium) {
+            const [rows] = await db.query('SELECT * FROM ejercicioPremium WHERE id_usuario = ? ORDER BY RAND() LIMIT 1', [userId]);
+            res.json(rows[0] || { error: 'No se encontraron ejercicios premium' });
+        } else {
+            res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
+        }
+    } catch (error) {
+        console.error('Error al obtener ejercicio premium:', error);
+        res.status(500).json({ error: 'Error al obtener ejercicios premium' });
+    }
+});
+
+module.exports = router;

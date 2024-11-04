@@ -19,22 +19,18 @@
  *: base de datos hecha en MySQL
  *:------------------------------------------------------------------------------------------------------
  */
-const mysql = require ( 'mysql' );
-const dbConfig = {
-  host: 'junction.proxy.rlwy.net',
-  user: 'root',
-  password: 'LmLuOARbhmianYVMjAgzpRKeVRyqBYug',
-  database: 'horizonhealth'
-};
+ const mysql = require('mysql2/promise');
 
-const connection = mysql.createConnection ( dbConfig );
-
-connection.connect ( ( err ) => {
-  if ( err ) {
-    console.error ( 'Error conectando a la base de datos:', err );
-    return;
-  }
-  console.log ( 'Conectado a la base de datos MySQL' );
-} );
-
-module.exports = connection;
+ // Configuración de la base de datos
+ const dbConfig = {
+     host: 'localhost',
+     user: 'root',
+     password: '1234',
+     database: 'horizonhealth'
+ };
+ 
+ // Crear la conexión usando el modo de promesas
+ const connection = mysql.createPool(dbConfig);
+ 
+ module.exports = connection;
+ 
