@@ -37,28 +37,32 @@
  
  // Inicio de sesión de un usuario
  router.post('/login', async (req, res) => {
-     const { correo, contrasena } = req.body;
- 
-     try {
-         // Buscar el usuario por correo electrónico
-         const [user] = await db.query('SELECT * FROM usuario WHERE correo = ?', [correo]);
- 
-         if (user.length > 0) {
-             // Verificar la contraseña
-             const isPasswordValid = await bcrypt.compare(contrasena, user[0].contrasena);
-             if (isPasswordValid) {
-                 res.json({ message: 'Inicio de sesión exitoso', userId: user[0].id_usuario, premium: user[0].premium });
-             } else {
-                 res.status(401).json({ error: 'Credenciales incorrectas' });
-             }
-         } else {
-             res.status(404).json({ error: 'Usuario no encontrado' });
-         }
-     } catch (error) {
-         console.error(error);
-         res.status(500).json({ error: 'Error al iniciar sesión' });
-     }
- });
+    const { correo, contrasena } = req.query;  // Asegúrate de usar req.query si envías los datos en la URL
+
+    try {
+        console.log('Correo recibido:', correo);
+        const [user] = await db.query('SELECT * FROM usuario WHERE correo = ?', [correo]);
+
+        if (user.length > 0) {
+            console.log('Usuario encontrado:', user[0]);
+
+            // Verificar la contraseña usando bcrypt
+            const isPasswordValid = await bcrypt.compare(contrasena, user[0].contrasena);
+            console.log('¿La contraseña es válida?', isPasswordValid);
+
+            if (isPasswordValid) {
+                res.json({ message: 'Inicio de sesión exitoso', userId: user[0].id_usuario, premium: user[0].premium });
+            } else {
+                res.status(401).json({ error: 'Credenciales incorrectas' });
+            }
+        } else {
+            res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+    } catch (error) {
+        console.error('Error en el inicio de sesión:', error);
+        res.status(500).json({ error: 'Error al iniciar sesión' });
+    }
+});
  
  // Actualizar usuario a premium
  router.put('/upgrade/:userId', async (req, res) => {
