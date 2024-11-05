@@ -20,20 +20,18 @@
  *:------------------------------------------------------------------------------------------------------
  */
 
-const mysql = require ( 'mysql' );
-const dotenv = require ( 'dotenv' );
-dotenv.config ();
-
-// Configuración de la base de datos
-const dbConfig = {
-  host: process.env.HOST,
-  user: process.env.USER,
-  password: process.env.PASSWORD,
-  database: process.env.DB
-};
+ require('dotenv').config();
+ const mysql = require('mysql2/promise');
  
- // Crear la conexión usando el modo de promesas
+ const dbConfig = {
+     host: process.env.DB_HOST,
+     user: process.env.DB_USER,
+     password: process.env.DB_PASSWORD,
+     database: process.env.DB_NAME
+ };
+ 
  const connection = mysql.createPool(dbConfig);
  
  module.exports = connection;
+ 
  
