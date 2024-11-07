@@ -22,7 +22,7 @@ router.post('/contact', async (req, res) => {
         to: 'csunset.wellness.hh@gmail.com',
         subject: 'Nuevo mensaje de contacto',
         text: `
-        Nombre: ${nombre} ${apellido}
+        Nombre: ${nombre} ${apellido}   
         Correo Electrónico: ${correo}
         Teléfono: ${telefono}
         Mensaje: ${mensaje}

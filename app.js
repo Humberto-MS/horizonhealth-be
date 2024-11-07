@@ -28,6 +28,10 @@
  const app = express();
  const db = require('./db');
  const bodyParser = require('body-parser');
+ const cors = require('cors');
+
+ //configurar cors para permitir peticiones desde cualquier dominio :)
+ app.use(cors());
  
  // Middleware
  app.use(bodyParser.json()); // Manejo de JSON
