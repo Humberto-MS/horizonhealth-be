@@ -26,25 +26,28 @@
      }
  });
  
- // Obtener una lectura premium aleatoria (solo para usuarios premium)
- router.get('/lecturas/premium', async (req, res) => {
-     const { userId } = req.query;
- 
-     try {
-         const userResults = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
-         const user = userResults[0];
- 
-         if (user && user.length > 0 && user[0].premium) {
-             const [lecturaPremium] = await db.query('SELECT * FROM lecturaPremium WHERE id_usuario = ? ORDER BY RAND() LIMIT 1', [userId]);
-             res.json(lecturaPremium[0] || { error: 'No se encontraron lecturas premium' });
-         } else {
-             res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
-         }
-     } catch (error) {
-         console.error('Error al obtener lectura premium:', error);
-         res.status(500).json({ error: 'Error al obtener lectura premium' });
-     }
- });
+// Obtener una lectura premium aleatoria (solo para usuarios premium)
+router.get('/lecturas/premium', async (req, res) => {
+    const { userId } = req.query;
+
+    try {
+        // Verificar si el usuario es premium
+        const [userResults] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
+        const user = userResults[0];
+
+        if (user && user.premium) {
+            // Obtener una lectura premium aleatoria, sin filtrar por id_usuario
+            const [lecturaPremium] = await db.query('SELECT * FROM lecturaPremium ORDER BY RAND() LIMIT 1');
+            res.json(lecturaPremium[0] || { error: 'No se encontraron lecturas premium' });
+        } else {
+            res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
+        }
+    } catch (error) {
+        console.error('Error al obtener lectura premium:', error);
+        res.status(500).json({ error: 'Error al obtener lectura premium' });
+    }
+});
+
  
  module.exports = router;
  
