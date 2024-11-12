@@ -103,7 +103,7 @@ router.get('/premium-status/:userId', async (req, res) => {
 
 // Obtener todos los datos d eun usuario mediante su id
 router.get('/usuarios/:userId', async (req, res) => {
-    const { userId } = req.query;
+    const { userId } = req.params;
 
     try {
         const [row] = await db.query('SELECT * FROM usuario WHERE id_usuario = ?', [userId]);
