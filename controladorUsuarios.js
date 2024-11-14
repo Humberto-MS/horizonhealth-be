@@ -148,12 +148,19 @@ router.put('/cambiar-contrasena/:userId', async (req, res) => {
     const { contrasenaActual, nuevaContrasena } = req.body;
 
     try {
-        // Obtener la contraseña actual del usuario
+        // Obtener la contraseña actual del usuario desde la base de datos
         const [userResults] = await db.query('SELECT contrasena FROM usuario WHERE id_usuario = ?', [userId]);
+
+        // Verificar que el usuario exista
+        if (userResults.length === 0) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
         const user = userResults[0];
 
-        // Verificar la contraseña actual
+        // Comparar la contraseña actual proporcionada con la almacenada (en formato hash)
         const isPasswordValid = await bcrypt.compare(contrasenaActual, user.contrasena);
+        
         if (!isPasswordValid) {
             return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
         }
@@ -161,8 +168,9 @@ router.put('/cambiar-contrasena/:userId', async (req, res) => {
         // Hashear la nueva contraseña
         const hashedPassword = await bcrypt.hash(nuevaContrasena, 10);
 
-        // Actualizar la contraseña en la base de datos
+        // Actualizar la contraseña en la base de datos con la nueva contraseña hasheada
         await db.query('UPDATE usuario SET contrasena = ? WHERE id_usuario = ?', [hashedPassword, userId]);
+
         res.json({ message: 'Contraseña actualizada correctamente' });
     } catch (error) {
         console.error('Error al cambiar la contraseña:', error);
