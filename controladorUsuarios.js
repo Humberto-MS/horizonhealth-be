@@ -101,14 +101,16 @@ router.get('/premium-status/:userId', async (req, res) => {
     }
 });
 
-// Obtener todos los usuarios (opcional)
-router.get('/usuarios', async (req, res) => {
+// Obtener todos los datos d eun usuario mediante su id
+router.get('/usuarios/:userId', async (req, res) => {
+    const { userId } = req.params;
+
     try {
-        const [rows] = await db.query('SELECT id_usuario, nombre, correo, premium FROM usuario');
-        res.json(rows);
+        const [row] = await db.query('SELECT * FROM usuario WHERE id_usuario = ?', [userId]);
+        res.json(row);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Error al obtener los usuarios' });
+        res.status(500).json({ error: 'Error al obtener el ususario' });
     }
 });
 
