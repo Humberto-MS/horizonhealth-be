@@ -23,6 +23,7 @@
  *: Modificación: Inclusión de rutas para controladores estándar y premium
  *:======================================================================================================
  */
+require ('dotenv').config();
 
  const express = require('express');
  const app = express();

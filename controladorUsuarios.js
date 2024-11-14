@@ -16,6 +16,10 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const db = require('./db');  // Conexión a la base de datos
 
+// Importar configuración de Cloudinary y Multer
+const cloudinary = require("../utils/cloudinary");
+const upload = require("../middleware/multer");
+
 // Registro de un nuevo usuario
 router.post('/registro', async (req, res) => {
     const { nombre, correo, contrasena, premium = false } = req.body;
@@ -34,6 +38,34 @@ router.post('/registro', async (req, res) => {
         res.status(500).json({ error: 'Error al registrar usuario' });
     }
 });
+
+// Endpoint para cambiar la foto de perfil del usuario
+router.post('/usuarios/:userId/upload', upload.single('image'), async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        // Subir la imagen a Cloudinary
+        cloudinary.uploader.upload(req.file.path, async (err, result) => {
+            if (err) {
+                console.error('Error en la subida a Cloudinary:', err);
+                return res.status(500).json({ success: false, message: "Error al subir la imagen" });
+            }
+
+            // Guardar la URL de la imagen en la base de datos
+            await db.query('UPDATE usuario SET foto_perfil = ? WHERE id_usuario = ?', [result.secure_url, userId]);
+            
+            res.status(200).json({
+                success: true,
+                message: "Imagen subida y perfil actualizado",
+                data: result
+            });
+        });
+    } catch (error) {
+        console.error('Error al actualizar la foto de perfil:', error);
+        res.status(500).json({ error: 'Error al actualizar la foto de perfil' });
+    }
+});
+
 
 // Inicio de sesión de un usuario
 router.post('/login', async (req, res) => {
@@ -114,19 +146,6 @@ router.get('/usuarios/:userId', async (req, res) => {
     }
 });
 
-// Cambiar la foto de perfil del usuario
-router.put('/cambiar-foto/:userId', async (req, res) => {
-    const { userId } = req.params;
-    const { fotoPerfil } = req.body;
-
-    try {
-        await db.query('UPDATE usuario SET foto_perfil = ? WHERE id_usuario = ?', [fotoPerfil, userId]);
-        res.json({ message: 'Foto de perfil actualizada correctamente' });
-    } catch (error) {
-        console.error('Error al actualizar la foto de perfil:', error);
-        res.status(500).json({ error: 'Error al actualizar la foto de perfil' });
-    }
-});
 
 // Cambiar el nombre y el correo del usuario
 router.put('/cambiar-datos/:userId', async (req, res) => {
