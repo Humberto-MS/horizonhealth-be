@@ -31,11 +31,11 @@
      const { userId } = req.query;
  
      try {
-         const userResults = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
+         const [userResults] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
          const user = userResults[0];
  
-         if (user && user.length > 0 && user[0].premium) {
-             const [actividadPremium] = await db.query('SELECT * FROM actividadPremium WHERE id_usuario = ? ORDER BY RAND() LIMIT 1', [userId]);
+         if (user && user.premium) {
+             const [actividadPremium] = await db.query('SELECT * FROM actividadPremium ORDER BY RAND() LIMIT 1');
              res.json(actividadPremium[0] || { error: 'No se encontraron actividades premium' });
          } else {
              res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
