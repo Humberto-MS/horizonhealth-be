@@ -54,10 +54,13 @@ router.post('/usuarios/:userId/upload', upload.single('image'), async (req, res)
             // Guardar la URL de la imagen en la base de datos
             await db.query('UPDATE usuario SET foto_perfil = ? WHERE id_usuario = ?', [result.secure_url, userId]);
             
+            // Responder con la URL de la imagen
             res.status(200).json({
                 success: true,
                 message: "Imagen subida y perfil actualizado",
-                data: result
+                data: {
+                    url: result.secure_url  // Incluye el URL de la imagen en la respuesta
+                }
             });
         });
     } catch (error) {
@@ -65,6 +68,7 @@ router.post('/usuarios/:userId/upload', upload.single('image'), async (req, res)
         res.status(500).json({ error: 'Error al actualizar la foto de perfil' });
     }
 });
+
 
 
 // Inicio de sesión de un usuario
