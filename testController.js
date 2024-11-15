@@ -14,9 +14,9 @@
  const router = express.Router();
  const db = require('./db'); // Conexión a la base de datos
  
- // Obtener frases del día basadas en el puntaje del test
- router.get('/frases-del-dia', async (req, res) => {
-     const { puntaje } = req.query;
+ // Guardar puntaje del test
+ router.post('/guardar-puntaje', async (req, res) => {
+     const { userId, puntaje } = req.body;
  
      // Validar que el puntaje esté entre 1 y 5
      if (puntaje < 1 || puntaje > 5) {
@@ -24,54 +24,35 @@
      }
  
      try {
-         // Consultar las frases basadas en el puntaje
-         const [frases] = await db.query('SELECT frase, autor FROM frasesPremium WHERE puntajeFrase = ?', [puntaje]);
-         res.json(frases);
+         const result = await db.query(
+             'INSERT INTO test (id_usuario, puntaje, fecha_test) VALUES (?, ?, CURRENT_DATE)',
+             [userId, puntaje]
+         );
+         res.status(201).json({ message: 'Puntaje guardado exitosamente', testId: result.insertId });
      } catch (error) {
-         console.error('Error al obtener las frases del día:', error);
-         res.status(500).json({ error: 'Error al obtener las frases del día' });
+         console.error('Error al guardar el puntaje del test:', error);
+         res.status(500).json({ error: 'Error al guardar el puntaje del test' });
      }
  });
  
- // Obtener preguntas del test semanal
- router.get('/preguntas-test', async (req, res) => {
-     try {
-         const [preguntas] = await db.query('SELECT id_pregunta, texto_pregunta FROM pregunta_test');
-         res.json(preguntas);
-     } catch (error) {
-         console.error('Error al obtener preguntas del test:', error);
-         res.status(500).json({ error: 'Error al obtener preguntas del test' });
-     }
- });
- 
- // Guardar respuestas del test semanal
- router.post('/guardar-respuestas', async (req, res) => {
-     const { userId, respuestas } = req.body;
+ // Obtener todos los resultados de los tests realizados por un usuario
+ router.get('/resultados-test/:userId', async (req, res) => {
+     const { userId } = req.params;
  
      try {
-         // Validar el formato de las respuestas
-         if (!Array.isArray(respuestas) || respuestas.length === 0) {
-             return res.status(400).json({ error: 'Las respuestas deben enviarse en un array.' });
+         const [results] = await db.query(
+             'SELECT id_test, puntaje, fecha_test FROM test WHERE id_usuario = ? ORDER BY fecha_test DESC',
+             [userId]
+         );
+ 
+         if (results.length > 0) {
+             res.json(results);
+         } else {
+             res.status(404).json({ error: 'No se encontraron resultados de test para este usuario.' });
          }
- 
-         // Insertar cada respuesta en la base de datos
-         for (const respuesta of respuestas) {
-             const { id_pregunta, respuesta_valor } = respuesta;
- 
-             if (respuesta_valor < 1 || respuesta_valor > 5) {
-                 return res.status(400).json({ error: `Respuesta inválida en la pregunta ${id_pregunta}. Debe estar entre 1 y 5.` });
-             }
- 
-             await db.query(
-                 'INSERT INTO respuesta_test (id_usuario, id_pregunta, respuesta, fecha_respuesta) VALUES (?, ?, ?, CURRENT_DATE)',
-                 [userId, id_pregunta, respuesta_valor]
-             );
-         }
- 
-         res.status(201).json({ message: 'Respuestas del test guardadas exitosamente' });
      } catch (error) {
-         console.error('Error al guardar respuestas del test:', error);
-         res.status(500).json({ error: 'Error al guardar respuestas del test' });
+         console.error('Error al obtener los resultados de los tests:', error);
+         res.status(500).json({ error: 'Error al obtener los resultados de los tests.' });
      }
  });
  

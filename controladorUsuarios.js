@@ -17,8 +17,8 @@ const router = express.Router();
 const db = require('./db');  // Conexión a la base de datos
 
 // Importar configuración de Cloudinary y Multer
-const cloudinary = require("../utils/cloudinary");
-const upload = require("../middleware/multer");
+const cloudinary = require("./cloudinary");
+const upload = require("./multer");
 
 // Registro de un nuevo usuario
 router.post('/registro', async (req, res) => {
