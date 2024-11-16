@@ -15,7 +15,7 @@
  const router = express.Router();
  const db = require('./db');  // Conexión a la base de datos
  
- // Obtener frases del día basadas en el puntaje del test (para usuarios no premium)
+ // Obtener una frase del día basada en el puntaje del test (para usuarios no premium)
  router.get('/frases-del-dia', async (req, res) => {
      const { puntaje } = req.query;
  
@@ -25,12 +25,15 @@
      }
  
      try {
-         // Consultar las frases basadas en el puntaje en la tabla de frases estándar
-         const [frases] = await db.query('SELECT frase, autor FROM frases WHERE puntajeFrase = ?', [puntaje]);
-         res.json(frases);
+         // Consultar una frase basada en el puntaje en la tabla de frases estándar
+         const [frase] = await db.query(
+             'SELECT frase, autor FROM frases WHERE puntajeFrase = ? ORDER BY RAND() LIMIT 1',
+             [puntaje]
+         );
+         res.json(frase[0] || { error: 'No se encontró una frase para el puntaje proporcionado.' });
      } catch (error) {
-         console.error('Error al obtener las frases del día:', error);
-         res.status(500).json({ error: 'Error al obtener las frases del día' });
+         console.error('Error al obtener la frase del día:', error);
+         res.status(500).json({ error: 'Error al obtener la frase del día' });
      }
  });
  
@@ -49,17 +52,17 @@
          const user = userResults[0];
  
          if (user && user.premium) {
-             // Consultar frases premium basadas en el puntaje proporcionado
+             // Consultar una frase premium basada en el puntaje proporcionado
              const [frasePremium] = await db.query(
                  'SELECT frasePre AS frase, autorPre AS autor FROM frasesPremium WHERE puntajeFrasePre = ? ORDER BY RAND() LIMIT 1',
                  [puntaje]
              );
-             res.json(frasePremium[0] || { error: 'No se encontraron frases premium para el puntaje proporcionado.' });
+             res.json(frasePremium[0] || { error: 'No se encontró una frase premium para el puntaje proporcionado.' });
          } else {
              res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
          }
      } catch (error) {
-         console.error('Error al obtener frase premium:', error);
+         console.error('Error al obtener la frase premium:', error);
          res.status(500).json({ error: 'Error al obtener la frase premium.' });
      }
  });

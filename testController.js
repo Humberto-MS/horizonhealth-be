@@ -16,7 +16,7 @@
  
  // Guardar puntaje del test
  router.post('/guardar-puntaje', async (req, res) => {
-     const { userId, puntaje } = req.body;
+     const { userId, puntaje } = req.query;
  
      // Validar que el puntaje esté entre 1 y 5
      if (puntaje < 1 || puntaje > 5) {
