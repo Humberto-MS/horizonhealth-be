@@ -49,7 +49,7 @@
  
      try {
          const [results] = await db.query(
-             'SELECT id_test, puntaje, fecha_test FROM test WHERE id_usuario = ? ORDER BY fecha_test DESC',
+             'SELECT id_test, puntaje, DATE_FORMAT(fecha_test, "%Y-%m-%d") AS fecha_test FROM test WHERE id_usuario = ? ORDER BY fecha_test DESC',
              [userId]
          );
  

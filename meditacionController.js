@@ -29,7 +29,12 @@
  
          const user = userResults[0];
          if (user.premium === 1) { // Verifica explícitamente si es premium
-             const [rows] = await db.query('SELECT * FROM meditacion WHERE id_usuario = ?', [userId]);
+            const [rows] = await db.query(
+                `SELECT id_meditacionPre, id_usuario, tiempo_meditacion, DATE_FORMAT(fecha_sesion, '%d-%m-%Y') AS fecha_sesion 
+                 FROM meditacion 
+                 WHERE id_usuario = ? 
+                 ORDER BY fecha_sesion DESC`,
+                [userId]);
              res.json(rows);
          } else {
              res.status(403).json({ error: 'Acceso denegado. Solo disponible para usuarios premium.' });
