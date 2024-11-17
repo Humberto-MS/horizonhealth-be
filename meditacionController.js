@@ -13,17 +13,22 @@
 
  const express = require('express');
  const router = express.Router();
- const db = require('./db');  // Conexión a la base de datos
+ const db = require('./db'); // Conexión a la base de datos
  
  // Obtener sesiones de meditación para usuarios premium
  router.get('/meditacion', async (req, res) => {
      const { userId } = req.query;
  
      try {
-         const userResults = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
-         const user = userResults[0];
+         // Verificar si el usuario existe y es premium
+         const [userResults] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
  
-         if (user && user.length > 0 && user[0].premium) {
+         if (userResults.length === 0) {
+             return res.status(404).json({ error: 'Usuario no encontrado.' });
+         }
+ 
+         const user = userResults[0];
+         if (user.premium === 1) { // Verifica explícitamente si es premium
              const [rows] = await db.query('SELECT * FROM meditacion WHERE id_usuario = ?', [userId]);
              res.json(rows);
          } else {
@@ -31,7 +36,7 @@
          }
      } catch (error) {
          console.error('Error al obtener sesiones de meditación:', error);
-         res.status(500).json({ error: 'Error al obtener sesiones de meditación' });
+         res.status(500).json({ error: 'Error al obtener sesiones de meditación.' });
      }
  });
  
@@ -41,10 +46,14 @@
  
      try {
          // Verificar si el usuario es premium
-         const userResults = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
-         const user = userResults[0];
+         const [userResults] = await db.query('SELECT premium FROM usuario WHERE id_usuario = ?', [userId]);
  
-         if (user && user.length > 0 && user[0].premium) {
+         if (userResults.length === 0) {
+             return res.status(404).json({ error: 'Usuario no encontrado.' });
+         }
+ 
+         const user = userResults[0];
+         if (user.premium === 1) { // Verifica explícitamente si es premium
              // Registrar la sesión de meditación
              const result = await db.query(
                  'INSERT INTO meditacion (id_usuario, duracion, fecha_sesion) VALUES (?, ?, ?)',
