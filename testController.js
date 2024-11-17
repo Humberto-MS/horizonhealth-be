@@ -14,26 +14,34 @@
  const router = express.Router();
  const db = require('./db'); // Conexión a la base de datos
  
- // Guardar puntaje del test
  router.post('/guardar-puntaje', async (req, res) => {
-     const { userId, puntaje } = req.query;
- 
-     // Validar que el puntaje esté entre 1 y 5
-     if (puntaje < 1 || puntaje > 5) {
-         return res.status(400).json({ error: 'Puntaje inválido. Debe estar entre 1 y 5.' });
-     }
- 
-     try {
-         const result = await db.query(
-             'INSERT INTO test (id_usuario, puntaje, fecha_test) VALUES (?, ?, CURRENT_DATE)',
-             [userId, puntaje]
-         );
-         res.status(201).json({ message: 'Puntaje guardado exitosamente', testId: result.insertId });
-     } catch (error) {
-         console.error('Error al guardar el puntaje del test:', error);
-         res.status(500).json({ error: 'Error al guardar el puntaje del test' });
-     }
- });
+    const { userId, puntaje } = req.body;
+
+    // Depurar: Verificar los datos recibidos
+    console.log('Datos recibidos:', { userId, puntaje });
+
+    // Validar que el userId y puntaje sean proporcionados
+    if (!userId || !puntaje) {
+        return res.status(400).json({ error: 'Faltan datos obligatorios: userId y puntaje' });
+    }
+
+    // Validar que el puntaje esté entre 1 y 5
+    if (puntaje < 1 || puntaje > 5) {
+        return res.status(400).json({ error: 'Puntaje inválido. Debe estar entre 1 y 5.' });
+    }
+
+    try {
+        const result = await db.query(
+            'INSERT INTO test (id_usuario, puntaje, fecha_test) VALUES (?, ?, CURRENT_TIMESTAMP)',
+            [userId, puntaje]
+        );
+        res.status(201).json({ message: 'Puntaje guardado exitosamente', testId: result.insertId });
+    } catch (error) {
+        console.error('Error al guardar el puntaje del test:', error);
+        res.status(500).json({ error: 'Error al guardar el puntaje del test' });
+    }
+});
+
  
  // Obtener todos los resultados de los tests realizados por un usuario
  router.get('/resultados-test/:userId', async (req, res) => {
