@@ -15,7 +15,7 @@
  const db = require('./db'); // Conexión a la base de datos
  
  router.post('/guardar-puntaje', async (req, res) => {
-    const { userId, puntaje } = req.body;
+    const { userId, puntaje, fechaTest } = req.body;
 
     // Depurar: Verificar los datos recibidos
     console.log('Datos recibidos:', { userId, puntaje });
@@ -32,8 +32,8 @@
 
     try {
         const result = await db.query(
-            'INSERT INTO test (id_usuario, puntaje, fecha_test) VALUES (?, ?, CURRENT_TIMESTAMP)',
-            [userId, puntaje]
+            'INSERT INTO test (id_usuario, puntaje, fecha_test) VALUES (?, ?, ?)',
+            [userId, puntaje, fechaTest || new Date()]
         );
         res.status(201).json({ message: 'Puntaje guardado exitosamente', testId: result.insertId });
     } catch (error) {
