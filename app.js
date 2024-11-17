@@ -55,7 +55,7 @@ require ('dotenv').config();
  app.use('/api/lecturas', lecturaController);
  app.use('/api/meditacion', meditacionController);
  app.use('/api/usuarios', controladorUsuarios);
- app.use('/api', contactRouter);
+ app.use('/api/contacto', contactRouter);
  app.use('/api/test', testController); // Ruta para el controlador de test
  
  // Ruta de prueba de conexión

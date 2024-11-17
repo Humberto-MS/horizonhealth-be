@@ -11,14 +11,15 @@ router.post('/contact', async (req, res) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail', // Usa el servicio de correo, por ejemplo, 'gmail'
         auth: {
-            user: 'tu_email@gmail.com', // Reemplaza con tu dirección de correo
-            pass: 'tu_contraseña'       // Reemplaza con tu contraseña o token de aplicación
+            user: process.env.EMAIL_USER, // Reemplaza con tu dirección de correo
+            pass: process.env.EMAIL_PASS  // Reemplaza con tu contraseña o token de aplicación
         }
     });
 
     // Opciones del correo
     const mailOptions = {
         from: correo,
+        // to: 'csunset.wellness.hh@gmail.com',
         to: 'csunset.wellness.hh@gmail.com',
         subject: 'Nuevo mensaje de contacto',
         text: `
