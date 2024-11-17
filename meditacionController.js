@@ -56,7 +56,7 @@
          if (user.premium === 1) { // Verifica explícitamente si es premium
              // Registrar la sesión de meditación
              const result = await db.query(
-                 'INSERT INTO meditacion (id_usuario, duracion, fecha_sesion) VALUES (?, ?, ?)',
+                 'INSERT INTO meditacion (id_usuario, tiempo_meditacion, fecha_sesion) VALUES (?, ?, ?)',
                  [userId, duracion, fechaSesion || new Date()]
              );
  
