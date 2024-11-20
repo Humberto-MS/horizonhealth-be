@@ -91,26 +91,26 @@ router.get('/resultados-test/:userId', async (req, res) => {
     }
 });
 
-// Obtener todos los registros de `testDiario` con día, mes, año, hora, minuto y segundo
-router.get('/test-diario/:userId', async (req, res) => {
+// Actualizar o registrar la fecha del test diario
+router.put('/test-diario/:userId', async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const [results] = await db.query(
-            'SELECT DATE_FORMAT(fechaTestDiario, "%Y-%m-%d %H:%i:%s") AS fechaTestDiario FROM testDiario WHERE id_usuario = ? ORDER BY fechaTestDiario DESC',
-            [userId]
+        // Actualizar o insertar la fecha del test diario para el usuario
+        const result = await db.query(
+            'INSERT INTO testDiario (id_usuario, fechaTestDiario) VALUES (?, ?) ' +
+            'ON DUPLICATE KEY UPDATE fechaTestDiario = VALUES(fechaTestDiario)',
+            [userId, new Date()]
         );
 
-        if (results.length > 0) {
-            // Devuelve un array con solo las fechas
-            res.json(results.map(record => record.fechaTestDiario));
-        } else {
-            res.status(404).json({ error: 'No se encontraron registros de test diario para este usuario.' });
-        }
+        res.status(200).json({
+            message: 'Fecha del test diario actualizada correctamente.'
+        });
     } catch (error) {
-        console.error('Error al obtener los registros de test diario:', error);
-        res.status(500).json({ error: 'Error al obtener los registros de test diario.' });
+        console.error('Error al actualizar la fecha del test diario:', error);
+        res.status(500).json({ error: 'Error al actualizar la fecha del test diario.' });
     }
 });
+
 
 module.exports = router;
