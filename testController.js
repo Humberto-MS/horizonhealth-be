@@ -44,29 +44,24 @@ router.post('/guardar-puntaje', async (req, res) => {
     }
 });
 
-// Guardar solo la fecha y hora del test diario en la tabla `testDiario`
-router.post('/guardar-test-diario', async (req, res) => {
-    const { userId } = req.body;
-
-    if (!userId) {
-        return res.status(400).json({ error: 'Falta el id del usuario (userId).' });
-    }
+// Actualizar o registrar la fecha del test diario
+router.put('/test-diario/:userId', async (req, res) => {
+    const { userId } = req.params;
 
     try {
-        const currentDateTime = new Date();
+        // Actualizar o insertar la fecha del test diario para el usuario
         const result = await db.query(
-            'INSERT INTO testDiario (id_usuario, fechaTestDiario) VALUES (?, ?)',
-            [userId, currentDateTime]
+            'INSERT INTO testDiario (id_usuario, fechaTestDiario) VALUES (?, ?) ' +
+            'ON DUPLICATE KEY UPDATE fechaTestDiario = VALUES(fechaTestDiario)',
+            [userId, new Date()]
         );
 
-        res.status(201).json({
-            message: 'Registro del test diario guardado exitosamente',
-            fechaTestDiario: currentDateTime,
-            testDiarioId: result.insertId
+        res.status(200).json({
+            message: 'Fecha del test diario actualizada correctamente.'
         });
     } catch (error) {
-        console.error('Error al guardar el registro del test diario:', error);
-        res.status(500).json({ error: 'Error al guardar el registro del test diario.' });
+        console.error('Error al actualizar la fecha del test diario:', error);
+        res.status(500).json({ error: 'Error al actualizar la fecha del test diario.' });
     }
 });
 
@@ -91,26 +86,29 @@ router.get('/resultados-test/:userId', async (req, res) => {
     }
 });
 
-// Actualizar o registrar la fecha del test diario
-router.put('/test-diario/:userId', async (req, res) => {
+// Obtener la fecha del test diario por id_usuario
+router.get('/test-diario/:userId', async (req, res) => {
     const { userId } = req.params;
 
     try {
-        // Actualizar o insertar la fecha del test diario para el usuario
-        const result = await db.query(
-            'INSERT INTO testDiario (id_usuario, fechaTestDiario) VALUES (?, ?) ' +
-            'ON DUPLICATE KEY UPDATE fechaTestDiario = VALUES(fechaTestDiario)',
-            [userId, new Date()]
+        // Consulta para obtener la fecha del test diario para un usuario específico
+        const [results] = await db.query(
+            'SELECT DATE_FORMAT(fechaTestDiario, "%Y-%m-%d %H:%i:%s") AS fechaTestDiario ' +
+            'FROM testDiario WHERE id_usuario = ?',
+            [userId]
         );
 
-        res.status(200).json({
-            message: 'Fecha del test diario actualizada correctamente.'
-        });
+        if (results.length > 0) {
+            res.json({ fechaTestDiario: results[0].fechaTestDiario });
+        } else {
+            res.status(404).json({ error: 'No se encontró un registro de test diario para este usuario.' });
+        }
     } catch (error) {
-        console.error('Error al actualizar la fecha del test diario:', error);
-        res.status(500).json({ error: 'Error al actualizar la fecha del test diario.' });
+        console.error('Error al obtener la fecha del test diario:', error);
+        res.status(500).json({ error: 'Error al obtener la fecha del test diario.' });
     }
 });
+
 
 
 module.exports = router;
