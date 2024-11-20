@@ -44,26 +44,40 @@ router.post('/guardar-puntaje', async (req, res) => {
     }
 });
 
-// Actualizar o registrar la fecha del test diario
+// Actualizar o insertar la fecha del test diario
 router.put('/test-diario/:userId', async (req, res) => {
     const { userId } = req.params;
 
     try {
-        // Actualizar o insertar la fecha del test diario para el usuario
-        const result = await db.query(
-            'INSERT INTO testDiario (id_usuario, fechaTestDiario) VALUES (?, ?) ' +
-            'ON DUPLICATE KEY UPDATE fechaTestDiario = VALUES(fechaTestDiario)',
-            [userId, new Date()]
+        // Intentar actualizar la fecha del test diario para el usuario
+        const [result] = await db.query(
+            'UPDATE testDiario SET fechaTestDiario = ? WHERE id_usuario = ?',
+            [new Date(), userId]
         );
 
-        res.status(200).json({
-            message: 'Fecha del test diario actualizada correctamente.'
-        });
+        if (result.affectedRows > 0) {
+            // Si se actualizó un registro, enviar mensaje de éxito
+            res.status(200).json({
+                message: 'Fecha del test diario actualizada correctamente.'
+            });
+        } else {
+            // Si no se encontró un registro, insertar uno nuevo
+            const insertResult = await db.query(
+                'INSERT INTO testDiario (id_usuario, fechaTestDiario) VALUES (?, ?)',
+                [userId, new Date()]
+            );
+            res.status(201).json({
+                message: 'Registro de test diario creado exitosamente.',
+                id_testDiario: insertResult.insertId
+            });
+        }
     } catch (error) {
-        console.error('Error al actualizar la fecha del test diario:', error);
-        res.status(500).json({ error: 'Error al actualizar la fecha del test diario.' });
+        console.error('Error al actualizar o insertar la fecha del test diario:', error);
+        res.status(500).json({ error: 'Error al actualizar o insertar la fecha del test diario.' });
     }
 });
+
+
 
 // Obtener todos los resultados de los tests realizados por un usuario
 router.get('/resultados-test/:userId', async (req, res) => {
