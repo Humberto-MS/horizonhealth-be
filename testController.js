@@ -18,21 +18,17 @@
  router.post('/guardar-puntaje', async (req, res) => {
      const { userId, puntaje, fechaTest } = req.body;
  
-     // Depurar: Verificar los datos recibidos
      console.log('Datos recibidos:', { userId, puntaje });
  
-     // Validar que el userId y puntaje sean proporcionados
      if (!userId || !puntaje) {
          return res.status(400).json({ error: 'Faltan datos obligatorios: userId y puntaje' });
      }
  
-     // Validar que el puntaje esté entre 1 y 5
      if (puntaje < 1 || puntaje > 5) {
          return res.status(400).json({ error: 'Puntaje inválido. Debe estar entre 1 y 5.' });
      }
  
      try {
-         // Guardar el puntaje en la tabla `test`
          const result = await db.query(
              'INSERT INTO test (id_usuario, puntaje, fecha_test) VALUES (?, ?, ?)',
              [userId, puntaje, fechaTest || new Date()]
@@ -52,14 +48,12 @@
  router.post('/guardar-test-diario', async (req, res) => {
      const { userId } = req.body;
  
-     // Validar que el userId sea proporcionado
      if (!userId) {
          return res.status(400).json({ error: 'Falta el id del usuario (userId).' });
      }
  
      try {
-         // Registrar la fecha y hora exacta en `testDiario`
-         const currentDateTime = new Date(); // Obtener la fecha y hora actual
+         const currentDateTime = new Date();
          const result = await db.query(
              'INSERT INTO testDiario (id_usuario, fechaTestDiario) VALUES (?, ?)',
              [userId, currentDateTime]
@@ -97,11 +91,11 @@
      }
  });
  
- // Obtener todos los registros de `testDiario`
+ // Obtener todos los registros de `testDiario` solo con la fecha (día, mes, año)
  router.get('/test-diario', async (req, res) => {
      try {
          const [results] = await db.query(
-             'SELECT id_testDiario, id_usuario, DATE_FORMAT(fechaTestDiario, "%Y-%m-%d %H:%i:%s") AS fechaTestDiario FROM testDiario ORDER BY fechaTestDiario DESC'
+             'SELECT DATE_FORMAT(fechaTestDiario, "%Y-%m-%d") AS fechaTestDiario FROM testDiario ORDER BY fechaTestDiario DESC'
          );
  
          if (results.length > 0) {
