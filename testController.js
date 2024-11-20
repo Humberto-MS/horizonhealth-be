@@ -92,16 +92,20 @@ router.get('/resultados-test/:userId', async (req, res) => {
 });
 
 // Obtener todos los registros de `testDiario` con día, mes, año, hora, minuto y segundo
-router.get('/test-diario', async (req, res) => {
+router.get('/test-diario/:userId', async (req, res) => {
+    const { userId } = req.params;
+
     try {
         const [results] = await db.query(
-            'SELECT id_testDiario, DATE_FORMAT(fechaTestDiario, "%Y-%m-%d %H:%i:%s") AS fechaTestDiario FROM testDiario ORDER BY fechaTestDiario DESC'
+            'SELECT DATE_FORMAT(fechaTestDiario, "%Y-%m-%d %H:%i:%s") AS fechaTestDiario FROM testDiario WHERE id_usuario = ? ORDER BY fechaTestDiario DESC',
+            [userId]
         );
 
         if (results.length > 0) {
-            res.json(results);
+            // Devuelve un array con solo las fechas
+            res.json(results.map(record => record.fechaTestDiario));
         } else {
-            res.status(404).json({ error: 'No se encontraron registros de test diario.' });
+            res.status(404).json({ error: 'No se encontraron registros de test diario para este usuario.' });
         }
     } catch (error) {
         console.error('Error al obtener los registros de test diario:', error);
