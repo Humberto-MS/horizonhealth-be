@@ -206,13 +206,24 @@ router.delete('/eliminar-cuenta/:userId', async (req, res) => {
     const { userId } = req.params;
 
     try {
+        // Eliminar registros relacionados en la tabla `test`
+        await db.query('DELETE FROM test WHERE id_usuario = ?', [userId]);
+
+        // Eliminar registros relacionados en la tabla `testDiario`
+        await db.query('DELETE FROM testDiario WHERE id_usuario = ?', [userId]);
+
+        // Finalmente, eliminar al usuario
         await db.query('DELETE FROM usuario WHERE id_usuario = ?', [userId]);
-        res.json({ message: 'Cuenta eliminada correctamente' });
+
+        res.json({ message: 'Cuenta eliminada correctamente junto con sus registros relacionados.' });
     } catch (error) {
         console.error('Error al eliminar la cuenta:', error);
-        res.status(500).json({ error: 'Error al eliminar la cuenta' });
+        res.status(500).json({ error: 'Error al eliminar la cuenta.' });
     }
 });
+
+
+
 
 // Cancelar la suscripción premium
 router.put('/cancelar-suscripcion/:userId', async (req, res) => {
