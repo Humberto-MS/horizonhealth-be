@@ -13,7 +13,7 @@
 
  const express = require('express');
  const router = express.Router();
- const db = require('./db');  // Conexión a la base de datos
+ const db = require('../db/db');  // Conexión a la base de datos
  
  // Obtener una frase del día basada en el puntaje del test (para usuarios no premium)
  router.get('/frases-del-dia', async (req, res) => {

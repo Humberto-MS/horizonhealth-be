@@ -27,7 +27,7 @@ require ('dotenv').config();
 
  const express = require('express');
  const app = express();
- const db = require('./db');
+ const db = require('./db/db');
  const bodyParser = require('body-parser');
  const cors = require('cors');
 
@@ -39,14 +39,14 @@ require ('dotenv').config();
  app.use(bodyParser.urlencoded({ extended: true }));
  
  // Importar controladores
- const actividadController = require('./actividadController');
- const ejercicioController = require('./ejercicioController');
- const frasesController = require('./frasesController');
- const lecturaController = require('./lecturaController');
- const meditacionController = require('./meditacionController');
- const controladorUsuarios = require('./controladorUsuarios');
- const contactRouter = require('./contactController');
- const testController = require('./testController'); // Nuevo controlador para test
+ const actividadController = require('./controllers/actividadController');
+ const ejercicioController = require('./controllers/ejercicioController');
+ const frasesController = require('./controllers/frasesController');
+ const lecturaController = require('./controllers/lecturaController');
+ const meditacionController = require('./controllers/meditacionController');
+ const controladorUsuarios = require('./controllers/controladorUsuarios');
+ const contactRouter = require('./controllers/contactController');
+ const testController = require('./controllers/testController'); // Nuevo controlador para test
  
  // Rutas de controladores
  app.use('/api/actividades', actividadController);

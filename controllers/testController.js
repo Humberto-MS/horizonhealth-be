@@ -12,7 +12,7 @@
  */
 const express = require('express');
 const router = express.Router();
-const db = require('./db'); // Conexión a la base de datos
+const db = require('../db/db'); // Conexión a la base de datos
 
 // Guardar puntaje en la tabla `test` para tests semanales
 router.post('/guardar-puntaje', async (req, res) => {

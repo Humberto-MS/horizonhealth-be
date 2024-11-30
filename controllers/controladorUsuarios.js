@@ -14,11 +14,11 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
-const db = require('./db');  // Conexión a la base de datos
+const db = require('../db/db');  // Conexión a la base de datos
 
 // Importar configuración de Cloudinary y Multer
-const cloudinary = require("./cloudinary");
-const upload = require("./multer");
+const cloudinary = require("../utilities/cloudinary");
+const upload = require("../utilities/multer");
 
 // Registro de un nuevo usuario
 router.post('/registro', async (req, res) => {
